@@ -70,11 +70,11 @@ namespace PathFinder
         {
             return graph.FindPath(id_1, id_2);
         }
-        public List<Vector> GetLinkedPoints(int id)
+        public Dictionary<int, Vector> GetLinkedPoints(int id)
         {
-            List<Vector> points = new();
+            Dictionary<int, Vector> points = new();
             foreach (var p in graph[id].GetLinkedIDs())
-                points.Add(Points[p]);
+                points.Add(p, Points[p]);
             return points;
         }
         public string GraphString()

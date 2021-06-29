@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PathFinder.Models
 {
@@ -108,4 +109,40 @@ namespace PathFinder.Models
             TotalWeight = int.MaxValue;
         }
     }
+
+    public class Pair
+    {
+        public int A;
+        public int B;
+
+        public Pair(int a, int b)
+        {
+            A = a;
+            B = b;
+        }
+        public override string ToString() => $"{A}, {B}";
+        public override bool Equals(object obj)
+        {
+            return obj is Pair p && ((A == p.A && B == p.B) || (B == p.A && A == p.B));
+        }
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Math.Min(A, B), Math.Max(A, B));
+        }
+
+        public class Comparer : IEqualityComparer<Pair>
+        {
+            public bool Equals(Pair x, Pair y)
+            {
+                return (x.A == y.A && x.B == y.B) || (x.B == y.A && x.A == y.B);
+            }
+
+            public int GetHashCode([DisallowNull] Pair obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+    }
+
+    
 }

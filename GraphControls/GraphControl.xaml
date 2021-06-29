@@ -16,7 +16,6 @@
             <Canvas.ContextMenu>
                 <ContextMenu x:Name="contex_menu" StaysOpen="True">
                     <MenuItem Header="Add here" Click="Add_Click"/>
-                    <MenuItem Header="Add and connect" Click="AddConnect_Click" Visibility="Collapsed" x:Name="menu_addconnect"/>
                 </ContextMenu>
             </Canvas.ContextMenu>
         </Canvas>

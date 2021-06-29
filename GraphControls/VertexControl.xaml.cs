@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -140,6 +141,21 @@ namespace PathFinder.GraphControls
             NodeSelection.Path => Brushes.SaddleBrown,
             _ or NodeSelection.None => Brushes.LightYellow
         };
+        public static VertexControl FindByTag(Panel root, int tag)
+        {
+            foreach(var item in root.Children)
+                if (item is VertexControl control && control.tag == tag)
+                    return control;
+            return null;
+        }
+        public static Dictionary<int, VertexControl> FindInstances(Panel root)
+        {
+            Dictionary<int, VertexControl> result = new();
+            foreach (var item in root.Children)
+                if (item is VertexControl control)
+                    result.Add(control.tag, control);
+            return result;
+        }
     }
 
 

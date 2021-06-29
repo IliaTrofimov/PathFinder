@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using PathFinder.Models;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -15,6 +16,8 @@ namespace PathFinder.GraphControls
         private GraphView view;
         private List<int> path;
 
+        private Dictionary<Pair, Line> lines;
+
         private int selec_a, selec_b;
         public int Selection_A
         {
@@ -22,8 +25,7 @@ namespace PathFinder.GraphControls
             set
             {
                 selec_a = value;
-                if (selec_a != -1 || selec_b != -1)
-                    menu_addconnect.Visibility = Visibility.Visible;
+                txt_select.Text = SelectionStr;
             }
         }
         public int Selection_B
@@ -32,8 +34,7 @@ namespace PathFinder.GraphControls
             set
             {
                 selec_b = value;
-                if (selec_a != -1 || selec_b != -1)
-                    menu_addconnect.Visibility = Visibility.Visible;
+                txt_select.Text = SelectionStr;
             }
         }
         public int NodesCount
@@ -48,51 +49,55 @@ namespace PathFinder.GraphControls
             view = new();
             selec_a = -1;
             selec_b = -1;
+            lines = new();
             txt_select.Text = SelectionStr;
         }
 
 
         public delegate void SelectionReseted(GraphControl sender, SelectionResetedArgs e);
         public event SelectionReseted OnSelectionReseted;
-        public event SelectionReseted OnPathRedrawn;
-
-        public delegate void LinkRedrawing(GraphControl sender, LinksRedrawingArgs e);
-        public event LinkRedrawing OnLinkRedrawing;
-
-        public delegate void LinkRemoving(GraphControl sender, int nodeId);
-        public event LinkRemoving OnLinkRemoving;
 
 
         private void Draw()
         {
             canvas.Children.Clear();
-            txt_select.Text = SelectionStr;
+            lines.Clear();
+            txt_graphTable.Text = view.GraphString();
+
             foreach (var p_1 in view.Points)
             {
                 DrawNode(p_1.Value, p_1.Key);
                 foreach (var p_2 in view.GetLinkedPoints(p_1.Key))
-                    DrawLink(p_1.Value, p_2);
+                {
+                    Pair pair = new(p_1.Key, p_2.Key);
+                    if (!lines.ContainsKey(pair))
+                        DrawLink(p_1.Value, p_2.Value, pair);
+                }
             }
         }
-        private void DrawNode(Vector v, int id, bool is_path = false)
+        private void DrawNode(Vector v, int id)
         {
             VertexControl ver = new(id, ToNodeSelection(id));
-            ver.BaseBrush = is_path ? Brushes.SandyBrown : Brushes.LightYellow;
+            ver.BaseBrush = Brushes.LightYellow;
             canvas.Children.Add(ver);
             Canvas.SetLeft(ver, v.X);
             Canvas.SetTop(ver, v.Y);
             Panel.SetZIndex(ver, 2);
 
             ver.OnSelectionChanged += OnSelectionChanged;
-            ver.OnLinksSelectionChanged += OnLinksSelectionChanged;
             ver.OnRemoved += OnNodeRemoved;
             ver.OnConnected += OnConnected;
             OnSelectionReseted += ver.OnSelectionReseted;
-            OnPathRedrawn += ver.OnPathRedrawn;
         }
-        private void DrawLink(Vector v1, Vector v2)
+        private void DrawLink(Vector v1, Vector v2, Pair pair)
         {
-            Line l = new() { X1 = v1.X, X2 = v2.X, Y1 = v1.Y, Y2 = v2.Y, Stroke = Brushes.Gray };
+            Line l = new()
+            {
+                X1 = v1.X, X2 = v2.X,
+                Y1 = v1.Y, Y2 = v2.Y,
+                Stroke = Brushes.Gray,
+            };
+            lines.Add(pair, l);
             canvas.Children.Add(l);
             Canvas.SetLeft(l, 12.5);
             Canvas.SetTop(l, 12.5);
@@ -100,23 +105,25 @@ namespace PathFinder.GraphControls
         }
         private void DrawPath()
         {
-            foreach (var id in view.Points.Keys)
-                if(path.Contains(id)) OnPathRedrawn(this, new(id, NodeSelection.Path));
+            for (int i = 0; i < path.Count - 1; i++)
+                lines[new(path[i], path[i + 1])].Stroke = Brushes.Brown;
         }
 
 
         private void OnNodeRemoved(VertexControl sender, int id)
         {
             canvas.Children.Remove(sender);
+            foreach (var p_2 in view.GetLinkedPoints(id))
+            {
+                Pair pair = new(id, p_2.Key);
+                canvas.Children.Remove(lines[pair]);
+                lines.Remove(pair);
+            }
+                
             view.RemoveNode(id);
-            if (selec_a == id) Selection_A = -1;
-            if (selec_b == id) Selection_B = -1;
+            Selection_A = -1;
+            Selection_B = -1;
             txt_graphTable.Text = view.GraphString();
-            Draw();
-        }
-        private void OnLinksSelectionChanged(VertexControl sender, int id)
-        {
-            
         }
         private void OnSelectionChanged(VertexControl sender, SelectionChangedArgs e)
         {
@@ -136,7 +143,6 @@ namespace PathFinder.GraphControls
                     OnSelectionReseted(this, new(e.Id, e.newSelection));
                     break;
             }
-            txt_select.Text = SelectionStr;
         }
         private void OnConnected(VertexControl sender, int id)
         {
@@ -145,8 +151,6 @@ namespace PathFinder.GraphControls
 
             if (selec_b != -1) Connect();
         }
-
-
         private void Canvas_Loaded(object sender, RoutedEventArgs e)
         {
             Draw();
@@ -157,16 +161,8 @@ namespace PathFinder.GraphControls
             if (id != -1)
                 DrawNode(view.Points[id], id);
             txt_graphTable.Text = view.GraphString();
-        }
-        private void AddConnect_Click(object sender, RoutedEventArgs e)
-        {
-            int id = view.AddNode((Vector)Mouse.GetPosition(this));
-            if (selec_a != -1)
-                view.Connect(selec_a, id);
-            else if (selec_b != -1)
-                view.Connect(selec_b, id);
-
-            Draw();
+            Selection_A = -1;
+            Selection_B = -1;
         }
 
 
@@ -239,20 +235,8 @@ namespace PathFinder.GraphControls
 
         public SelectionResetedArgs(int id, NodeSelection newSelection)
         {
-            this.Id = id;
+            Id = id;
             this.newSelection = newSelection;
-        }
-    }
-    public class LinksRedrawingArgs
-    {
-        public int Id_1, Id_2;
-        public LinkSelection Selection;
-
-        public LinksRedrawingArgs(int id_1, int id_2, LinkSelection selection)
-        {
-            Id_1 = id_1;
-            Id_2 = id_2;
-            Selection = selection;
         }
     }
 }
