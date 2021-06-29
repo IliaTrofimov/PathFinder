@@ -1,0 +1,43 @@
+﻿<Window x:Class="PathFinder.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PathFinder"
+        mc:Ignorable="d"
+        Title="About" Height="298" Width="568" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition/>
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+
+            <Label Content="Version" Grid.Row="1" HorizontalAlignment="Left" FontWeight="Bold"/>
+            <Label Content="Author" Grid.Row="2" HorizontalAlignment="Left" FontWeight="Bold"/>
+            <Label Content="Description" Grid.Row="3" HorizontalAlignment="Left" FontWeight="Bold"/>
+
+            <TextBlock Grid.Column="1" Grid.Row="0" x:Name="txt_appname" TextWrapping="Wrap" Margin="5" Text="{Binding ElementName=System.Reflection.Assembly.GetExecutingAssembly().Version}" FontSize="15" FontWeight="Bold"/>
+            <TextBlock Grid.Column="1" Grid.Row="1" x:Name="txt_version" TextWrapping="Wrap" Margin="5"/>
+            <TextBlock Grid.Column="1" Grid.Row="2" x:Name="txt_author" TextWrapping="Wrap" Margin="5"/>
+            <TextBlock Grid.Column="1" Grid.Row="3" x:Name="txt_describtion" TextWrapping="Wrap" Margin="5" Text="Small graph editor that allows create, load, save graphs and search for shortest paths."/>
+
+            <Button Content="OK" Click="Button_Click" Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" IsDefault="True"/>
+        </Grid>
+
+        <Image Source="/Logo.png" Stretch="Fill" Grid.Column="0"/>
+
+    </Grid>
+</Window>

@@ -1,0 +1,38 @@
+﻿<Window x:Class="PathFinder.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PathFinder"
+        mc:Ignorable="d"
+        Title="Graph editor" Height="450" Width="800"
+        xmlns:graphcontrols="clr-namespace:PathFinder.GraphControls">
+    <Grid x:Name="grid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25px"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Menu Grid.Row="0">
+            <MenuItem Header="File">
+                <MenuItem Header="Open" Click="Open_Click"/>
+                <MenuItem Header="Save" Click="Save_Click"/>
+                <Separator/>
+                <MenuItem Header="Exit" Click="Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="Edit">
+                <MenuItem Header="Edit connections" Click="ConnectWindow_Click"/>
+                <MenuItem Header="Connect selected" Click="Connect_Click"/>
+                <Separator/>
+                <MenuItem Header="Disconnect selected" Click="Disconnect_Click"/>
+                <MenuItem Header="Disconnect all" Click="DisconnectAll_Click"/>
+                <Separator/>
+                <MenuItem Header="Reset" Click="Reset_Click"/>
+            </MenuItem>
+            <MenuItem Header="Find path" Click="Run_Click"/>
+            <MenuItem Header="About" Click="About_Click"/>
+        </Menu>
+
+        <graphcontrols:GraphControl Grid.Row="1" x:Name="graph"/>
+    </Grid>
+</Window>
