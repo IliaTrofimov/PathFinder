@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace PathFinder
 {
@@ -50,7 +51,14 @@ namespace PathFinder
         }
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
-            graph.Reset();
+            Models.GraphBuilder.GridTypes type = ((MenuItem)sender).Uid switch
+            {
+                "Rec" => Models.GraphBuilder.GridTypes.Rectangle,
+                "Tri" => Models.GraphBuilder.GridTypes.Triangle,
+                "Rom" => Models.GraphBuilder.GridTypes.Romb,
+                _ or "_" => Models.GraphBuilder.GridTypes.Empty
+            };
+            graph.Reset(type);
         }
         private void Run_Click(object sender, RoutedEventArgs e)
         {

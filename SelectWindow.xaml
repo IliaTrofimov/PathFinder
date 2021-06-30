@@ -17,13 +17,16 @@
             <RowDefinition Height="30px"/>
         </Grid.RowDefinitions>
 
-        <Label Content="Select first node"/>
-        <Label Content="Select second node" Grid.Column="1"/>
+        <Label Content="First node:" HorizontalAlignment="Left"/>
+        <Label Content="Second node:" Grid.Column="1" HorizontalAlignment="Left"/>
 
         <ListBox x:Name="list_a" Grid.Row="1"/>
         <ListBox x:Name="list_b" Grid.Row="1" Grid.Column="1"/>
 
         <Button Content="Connect" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="70" x:Uid="C" Click="SelectionChanged"/>
         <Button Content="Disconnect" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="70" x:Uid="D" Click="SelectionChanged"/>
+        <Label Content="{Binding SelectedItem, ElementName=list_a}" Margin="65,0,0,0"/>
+        <Label Content="Second node:" Grid.Column="1" HorizontalAlignment="Left"/>
+        <Label Content="{Binding SelectedItem, ElementName=list_b}" Grid.Column="1" Margin="82,0,0,0"/>
     </Grid>
 </Window>

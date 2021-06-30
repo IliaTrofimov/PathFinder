@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Controls;
 
 namespace PathFinder.GraphControls
 {
@@ -11,15 +10,6 @@ namespace PathFinder.GraphControls
     /// </summary>
     public partial class VertexControl : UserControl
     {
-        public Brush BaseBrush
-        {
-            get => base_brush;
-            set
-            {
-                base_ellipse.Fill = value;
-                base_brush = value;
-            }
-        }
         private Brush base_brush;
         public NodeSelection Selection
         {
@@ -27,7 +17,8 @@ namespace PathFinder.GraphControls
             set
             {
                 selection = value;
-                BaseBrush = SelectionColor(value);
+                base_brush = SelectionColor(value);
+                base_ellipse.Fill = base_brush;
                 Tag = tag;
             }
         }
@@ -49,7 +40,6 @@ namespace PathFinder.GraphControls
             InitializeComponent();
             Tag = tag;
             Selection = selection;
-            base_brush = SelectionColor(selection);
             menu_clear.Visibility = selection != NodeSelection.None ? Visibility.Visible : Visibility.Collapsed;
         }
 
@@ -57,24 +47,33 @@ namespace PathFinder.GraphControls
         public delegate void SelectionChanged(VertexControl sender, SelectionChangedArgs e);
         public event SelectionChanged OnSelectionChanged;
 
-        public delegate void LinksSelectionChanged(VertexControl sender, int id);
-        public event LinksSelectionChanged OnLinksSelectionChanged;
-
         public delegate void Removed(VertexControl sender, int id);
-        public event LinksSelectionChanged OnRemoved;
+        public event Removed OnRemoved;
 
         public delegate void Connected(VertexControl sender, int id);
         public event Connected OnConnected;
 
 
+        /// <summary>
+        /// Higlights control when mouse hovering over it.
+        /// </summary>
         private void Base_MouseEnter(object sender, MouseEventArgs e)
         {
             base_ellipse.Fill = Brushes.Azure;
         }
+       
+        /// <summary>
+        /// Returns base color to control when mouse stops hovering over it.
+        /// </summary>
         private void Base_MouseLeave(object sender, MouseEventArgs e)
         {
             base_ellipse.Fill = base_brush;
         }
+
+        /// <summary>
+        /// Changes control's selection when user selects new one in context menu. 
+        /// Also calls OnSelectionChanged to notify other VertexControls.
+        /// </summary>
         private void Select_Click(object sender, RoutedEventArgs e)
         {
             NodeSelection lastSelection = selection;
@@ -102,21 +101,28 @@ namespace PathFinder.GraphControls
             }
             OnSelectionChanged(this, new(tag, lastSelection, selection));
         }
-        private void Links_Click(object sender, RoutedEventArgs e)
-        {
-            OnLinksSelectionChanged(this, tag);
-        }
+        
+        /// <summary>
+        /// Calls OnRemoved to notify parent panel about node removal.
+        /// </summary>
         private void Remove_Click(object sender, RoutedEventArgs e)
         {
             OnRemoved(this, tag);
         }
+        
+        /// <summary>
+        /// Calls OnConnected to notify parent panel.
+        /// </summary>
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
             OnConnected(this, tag);
         }
 
 
-        public void OnSelectionReseted(GraphControl sender, SelectionResetedArgs e)
+        /// <summary>
+        /// Resets selection to match new selection told by associated GraphControl.
+        /// </summary>
+        public void OnSelectionReseted(GraphControl _, SelectionResetedArgs e)
         {
             if (e.Id != tag && e.newSelection == selection)
             {
@@ -126,47 +132,16 @@ namespace PathFinder.GraphControls
                 menu_selectB.Visibility = Visibility.Visible;
             }
         }
-        public void OnPathRedrawn(GraphControl sender, SelectionResetedArgs e)
-        {
-            // TODO: optimize
-            if (e.Id == tag)
-                Selection = NodeSelection.Path;
-        }
+        
 
-
+        /// <summary>
+        /// Returns Brush associated with exact NodeSelection.
+        /// </summary>
         public static Brush SelectionColor(NodeSelection s) => s switch
         {
             NodeSelection.A => Brushes.Crimson,
             NodeSelection.B => Brushes.CornflowerBlue,
-            NodeSelection.Path => Brushes.SaddleBrown,
             _ or NodeSelection.None => Brushes.LightYellow
         };
-        public static VertexControl FindByTag(Panel root, int tag)
-        {
-            foreach(var item in root.Children)
-                if (item is VertexControl control && control.tag == tag)
-                    return control;
-            return null;
-        }
-        public static Dictionary<int, VertexControl> FindInstances(Panel root)
-        {
-            Dictionary<int, VertexControl> result = new();
-            foreach (var item in root.Children)
-                if (item is VertexControl control)
-                    result.Add(control.tag, control);
-            return result;
-        }
-    }
-
-
-    public enum NodeSelection { A, B, Path, None }
-    public class SelectionChangedArgs : SelectionResetedArgs
-    {
-        public NodeSelection lastSelection;
-
-        public SelectionChangedArgs(int id, NodeSelection lastSelection, NodeSelection newSelection) : base(id, newSelection)
-        {
-            this.lastSelection = lastSelection;
-        }
     }
 }

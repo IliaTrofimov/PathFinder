@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace PathFinder
 {
@@ -65,27 +64,46 @@ namespace PathFinder
         }
 
 
+        /// <summary>
+        /// Returns node associated with this id or null if node wasn't found.
+        /// </summary>
         public Node this[int id]
         {
             get => !Nodes.ContainsKey(id) ? null : Nodes[id];
         }
+
+        /// <summary>
+        /// Returns weight of link between nodes associated with these IDs or 0 if nodes not connected or not exist.
+        /// </summary>
         public int this[int id_1, int id_2]
         {
             get => !(Nodes.ContainsKey(id_1) && Nodes.ContainsKey(id_2)) ? 0 : Nodes[id_1].Links[Nodes[id_2]];
         }
 
 
+        /// <summary>
+        /// Returns true if node present in this graph.
+        /// </summary>
         public bool Contains(int id) => Nodes.ContainsKey(id);
 
 
+        /// <summary>Attempts to add new node with this id.</summary>
+        /// <returns>Returns true if node was added successfully, else returns fasle.</returns>
         public bool AddNode(int id)
         {
             return Nodes.TryAdd(id, new Node(id));
         }
+
+        /// <summary>
+        /// Returns node associated with this id or null if node wasn't found. Same as Graph[id] and may be removed soon.
+        /// </summary>
         public Node GetNode(int id)
         {
             return this[id];
         }
+        
+        /// <summary>Attempts to remove node with this id.</summary>
+        /// <returns>Returns true if node was removed successfully, else returns fasle.</returns>
         public bool RemoveNode(int id)
         {
             var node_rem = GetNode(id);
@@ -99,6 +117,8 @@ namespace PathFinder
         }
 
 
+        /// <summary>Attempts to connect nodes with these id.</summary>
+        /// <returns>Returns true if nodes were connected successfully, else returns fasle.</returns>
         public bool Connect(int id_1, int id_2, int weight)
         {
             var n1 = GetNode(id_1);
@@ -114,6 +134,9 @@ namespace PathFinder
             }
             return false;
         }
+        
+        /// <summary>Attempts to disconnect nodes with these id.</summary>
+        /// <returns>Returns true if nodes were disconnected successfully, else returns fasle.</returns>
         public bool Disconnect(int id_1, int id_2)
         {
             var n1 = GetNode(id_1);
@@ -129,6 +152,10 @@ namespace PathFinder
             }
             return false;
         }
+       
+        /// <summary>
+        /// Same as Connect() but this will create new nodes if nodes with such IDs doesn't present in graph.
+        /// </summary>
         public void ConnectAnyway(int id_1, int id_2, int weight)
         {
             if (!Contains(id_1))
@@ -141,6 +168,8 @@ namespace PathFinder
         }
 
 
+        /// <summary>Gets shortest path between two nodes.</summary>
+        /// <returns>List with nodes' IDs.</returns>
         public List<int> FindPath(int id_1, int id_2)
         {
             Models.PathFinder finder = new(this);

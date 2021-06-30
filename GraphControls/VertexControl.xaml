@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="25" d:DesignWidth="25"
              MouseEnter="Base_MouseEnter" MouseLeave="Base_MouseLeave">
-    <Grid Width="25" Height="25">
+    <Grid Width="25" Height="25" x:Name="grid">
         <Ellipse x:Name="base_ellipse" Fill="LightYellow" Width="25" Height="25"/>
         <TextBlock x:Name="label" HorizontalAlignment="Center" VerticalAlignment="Center"/>
     </Grid>
@@ -15,7 +15,6 @@
         <ContextMenu StaysOpen="True">
             <MenuItem Header="Select A" Click="Select_Click" Uid="A" x:Name="menu_selectA"/>
             <MenuItem Header="Select B" Click="Select_Click" Uid="B" x:Name="menu_selectB"/>
-            <MenuItem Header="Connect" Click="Connect_Click" x:Name="menu_connect"/>
             <Separator Background="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"/>
             <MenuItem Header="Clear" Click="Select_Click" Uid="_" x:Name="menu_clear" Visibility="Collapsed"/>
             <MenuItem Header="Delete" Click="Remove_Click"/>

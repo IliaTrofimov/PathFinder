@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Windows;
 
 namespace PathFinder.Models
 {
@@ -110,6 +110,9 @@ namespace PathFinder.Models
         }
     }
 
+    /// <summary>
+    /// Represents pair of int values with no order. For example Pair(1,2) equals Pair(2,1).
+    /// </summary>
     public class Pair
     {
         public int A;
@@ -129,20 +132,105 @@ namespace PathFinder.Models
         {
             return HashCode.Combine(Math.Min(A, B), Math.Max(A, B));
         }
-
-        public class Comparer : IEqualityComparer<Pair>
-        {
-            public bool Equals(Pair x, Pair y)
-            {
-                return (x.A == y.A && x.B == y.B) || (x.B == y.A && x.A == y.B);
-            }
-
-            public int GetHashCode([DisallowNull] Pair obj)
-            {
-                return obj.GetHashCode();
-            }
-        }
     }
 
-    
+
+    public class GraphBuilder
+    {
+        public enum GridTypes { Rectangle, Triangle, Romb, Empty }
+
+        public GridTypes Type;
+        public Rect Area;
+        public int Desnity;
+
+        public GraphBuilder(GridTypes type, Rect area, int desnity)
+        {
+            Type = type;
+            Area = area;
+            Desnity = desnity;
+        }
+
+        public void Build(out Graph graph, out Dictionary<int, Vector> points)
+        {
+            switch (Type)
+            {
+                case GridTypes.Rectangle:
+                    RectangleGrid(Area, out graph, out points, Desnity);
+                    break;
+                case GridTypes.Triangle:
+                    TriangleGrid(Area, out graph, out points, Desnity);
+                    break;
+                default:
+                    graph = new();
+                    points = new();
+                    break;
+            }
+        }
+
+        public static void RectangleGrid(Rect area, out Graph graph, out Dictionary<int, Vector> points, int density = 10)
+        {
+            if (density <= 0)
+                throw new ArgumentException("Density must be greater then 0");
+            graph = new();
+            points = new();
+            int key = 0;
+
+            for (double y = area.Y; y < area.Y + area.Height; y += area.Height / density)
+            {
+                for (double x = area.X; x < area.X+ area.Width; x += area.Width / density)
+                {
+                    points.Add(key, new(x, y));
+                    graph.AddNode(key);
+                    key++;
+                }
+            }
+
+            int i = 0;
+            for (; i < key - density; i++)
+            {
+                if((i + 1) % density != 0)
+                    graph.Connect(i, i + 1, (int)(points[i] - points[i + 1]).Length);
+                graph.Connect(i, i + density, (int)(points[i] - points[i + density]).Length);
+            }
+            for(; i < key - 1; i++)
+                graph.Connect(i, i + 1, (int)(points[i] - points[i + 1]).Length);
+        }
+
+        public static void TriangleGrid(Rect area, out Graph graph, out Dictionary<int, Vector> points, int density = 10)
+        {
+            if (density <= 0)
+                throw new ArgumentException("Density must be greater then 0");
+            graph = new();
+            points = new();
+            int key = 0;
+
+            for (double y = area.Y; y < area.Y + area.Height; y += area.Height / density)
+            {
+                for (double x = area.X; x < area.X + area.Width; x += area.Width / density)
+                {
+                    points.Add(key, new(x, y));
+                    graph.AddNode(key);
+                    key++;
+                }
+            }
+
+            int i = 0;
+            for (; i < key - density; i++)
+            {
+                if ((i + 1) % density != 0)
+                {
+                    graph.Connect(i, i + 1, (int)(points[i] - points[i + 1]).Length);
+                    graph.Connect(i, i + 1 + density, (int)(points[i] - points[i + 1 + density]).Length);
+                }
+                if (i % density != 0)
+                {
+                    graph.Connect(i, i - 1 + density, (int)(points[i] - points[i - 1 + density]).Length);
+                }
+
+                graph.Connect(i, i + density, (int)(points[i] - points[i + density]).Length);
+            }
+            for (; i < key - 1; i++)
+                graph.Connect(i, i + 1, (int)(points[i] - points[i + 1]).Length);
+        }
+    }
 }

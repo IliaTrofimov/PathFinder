@@ -8,10 +8,11 @@ namespace PathFinder
     class GraphView
     {
         private Graph graph;
-        public Dictionary<int, Vector> Points { get; private set; }
+        public Dictionary<int, Vector> Points { get => points; private set => points = value; }
+        private Dictionary<int, Vector> points;
         public int NodesCount => Points.Count;
         private int avaliable_id;
-
+        
 
         public GraphView()
         {
@@ -19,7 +20,13 @@ namespace PathFinder
             Points = new();
             avaliable_id = 0;
         }
-        
+
+        public GraphView(GraphBuilder builder)
+        {
+            builder.Build(out graph, out points);
+            avaliable_id = points.Count + 1;
+        }
+
 
         public int AddNode(Vector p)
         {
@@ -38,7 +45,7 @@ namespace PathFinder
                 Points.Remove(id);
                 graph.RemoveNode(id);
                 avaliable_id = id;
-            }      
+            }
             return false;
         }
         public void Clear()
@@ -61,7 +68,7 @@ namespace PathFinder
         }
         public void DisconnectAll()
         {
-            foreach(var node in graph.Nodes.Values)
+            foreach (var node in graph.Nodes.Values)
                 node.Links.Clear();
         }
 
@@ -80,10 +87,10 @@ namespace PathFinder
         public string GraphString()
         {
             string str = "";
-            foreach(var n in graph.Nodes)
+            foreach (var n in graph.Nodes)
             {
                 str += $"V{n.Key} - ({Points[n.Key].X:f0}, {Points[n.Key].Y:f0}):\t";
-                foreach(var l in n.Value.Links)
+                foreach (var l in n.Value.Links)
                     str += $" {l.Key.Id}";
                 str += "\n";
             }

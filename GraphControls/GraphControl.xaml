@@ -12,7 +12,7 @@
             <RowDefinition Height="0.4*"/>
         </Grid.RowDefinitions>
 
-        <Canvas Background="White" x:Name="canvas" Grid.RowSpan="2" Cursor="Cross">
+        <Canvas Background="White" x:Name="canvas" Grid.RowSpan="2" Cursor="Cross" ScrollViewer.HorizontalScrollBarVisibility="Visible" ScrollViewer.VerticalScrollBarVisibility="Visible">
             <Canvas.ContextMenu>
                 <ContextMenu x:Name="contex_menu" StaysOpen="True">
                     <MenuItem Header="Add here" Click="Add_Click"/>
@@ -20,14 +20,10 @@
             </Canvas.ContextMenu>
         </Canvas>
 
-        <Expander Grid.Row="1" HorizontalAlignment="Left" ExpandDirection="Up" Header="Debug table" IsExpanded="False" BorderBrush="{x:Null}" Padding="3,0,3,0">
+        <Expander Grid.Row="1" HorizontalAlignment="Left" ExpandDirection="Up" Header="Debug table" IsExpanded="True" BorderBrush="{x:Null}" Padding="3,0,3,0">
             <StackPanel Orientation="Horizontal">
-                <TextBlock x:Name="txt_graphTable" Width="300" HorizontalAlignment="Left" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
-                <TextBlock x:Name="txt_select" Text="1, 2">
-                    <TextBlock.Background>
-                        <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
-                    </TextBlock.Background>
-                </TextBlock>
+                <TextBox x:Name="txt_graphTable" Width="300" HorizontalAlignment="Left" Background="#FFF0F0F0" SelectionBrush="{x:Null}" BorderThickness="1,1,0,1" IsReadOnly="True"/>
+                <TextBox x:Name="txt_select" Text="1, 2" Background="#FFF0F0F0" SelectionBrush="{x:Null}" BorderThickness="0,1,1,1" IsReadOnly="True"/>
             </StackPanel>
         </Expander>
 
