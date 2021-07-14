@@ -8,7 +8,7 @@
              d:DesignHeight="25" d:DesignWidth="25"
              MouseEnter="Base_MouseEnter" MouseLeave="Base_MouseLeave">
     <Grid Width="25" Height="25" x:Name="grid">
-        <Ellipse x:Name="base_ellipse" Fill="LightYellow" Width="25" Height="25"/>
+        <Ellipse x:Name="base_ellipse" Fill="LightYellow"/>
         <TextBlock x:Name="label" HorizontalAlignment="Center" VerticalAlignment="Center"/>
     </Grid>
     <UserControl.ContextMenu>

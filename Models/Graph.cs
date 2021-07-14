@@ -14,7 +14,6 @@ namespace PathFinder
         /// </summary>
         public Dictionary<Node, int> Links { get; private set; }
 
-
         public Node(int id = 0)
         {
             Id = id;
@@ -73,11 +72,26 @@ namespace PathFinder
         }
 
         /// <summary>
-        /// Returns weight of link between nodes associated with these IDs or 0 if nodes not connected or not exist.
+        /// Gets weight of link between nodes associated with these IDs or 0 if nodes not connected or not exist.
         /// </summary>
         public int this[int id_1, int id_2]
         {
-            get => !(Nodes.ContainsKey(id_1) && Nodes.ContainsKey(id_2)) ? 0 : Nodes[id_1].Links[Nodes[id_2]];
+            get => Nodes.ContainsKey(id_1) && Nodes.ContainsKey(id_2) ? Nodes[id_1].Links[Nodes[id_2]] : 0;
+            set
+            {
+                if (!(Nodes.ContainsKey(id_1) && Nodes.ContainsKey(id_2)))
+                    throw new NodeDoesNotExistException();
+                if (value == 0)
+                {
+                    Nodes[id_1].Disconnect(Nodes[id_2]);
+                    Nodes[id_2].Disconnect(Nodes[id_1]);
+                }
+                else
+                {
+                    Nodes[id_1].Connect(Nodes[id_2], value);
+                    Nodes[id_2].Connect(Nodes[id_1], value);
+                }               
+            }
         }
 
 
@@ -94,19 +108,11 @@ namespace PathFinder
             return Nodes.TryAdd(id, new Node(id));
         }
 
-        /// <summary>
-        /// Returns node associated with this id or null if node wasn't found. Same as Graph[id] and may be removed soon.
-        /// </summary>
-        public Node GetNode(int id)
-        {
-            return this[id];
-        }
-        
         /// <summary>Attempts to remove node with this id.</summary>
         /// <returns>Returns true if node was removed successfully, else returns fasle.</returns>
         public bool RemoveNode(int id)
         {
-            var node_rem = GetNode(id);
+            var node_rem = this[id];
             if (node_rem != null)
             {
                 foreach (var node in Nodes)
@@ -121,36 +127,30 @@ namespace PathFinder
         /// <returns>Returns true if nodes were connected successfully, else returns fasle.</returns>
         public bool Connect(int id_1, int id_2, int weight)
         {
-            var n1 = GetNode(id_1);
-            if (n1 != null)
-            {
-                var n2 = GetNode(id_2);
-                if (n2 != null)
-                {
-                    n1.Connect(n2, weight);
-                    n2.Connect(n1, weight);
-                    return true;
-                }
+            try 
+            { 
+                this[id_1, id_2] = weight;
+                return true;
             }
-            return false;
+            catch (NodeDoesNotExistException)
+            {
+                return false;
+            }
         }
         
         /// <summary>Attempts to disconnect nodes with these id.</summary>
         /// <returns>Returns true if nodes were disconnected successfully, else returns fasle.</returns>
         public bool Disconnect(int id_1, int id_2)
         {
-            var n1 = GetNode(id_1);
-            if (n1 != null)
+            try
             {
-                var n2 = GetNode(id_2);
-                if (n2 != null)
-                {
-                    n1.Disconnect(n2);
-                    n2.Disconnect(n1);
-                    return true;
-                }
+                this[id_1, id_2] = 0;
+                return true;
             }
-            return false;
+            catch (NodeDoesNotExistException)
+            {
+                return false;
+            }
         }
        
         /// <summary>
@@ -166,14 +166,18 @@ namespace PathFinder
             this[id_1].Connect(this[id_2], weight);
             this[id_2].Connect(this[id_1], weight);
         }
+    }
 
 
-        /// <summary>Gets shortest path between two nodes.</summary>
-        /// <returns>List with nodes' IDs.</returns>
-        public List<int> FindPath(int id_1, int id_2)
-        {
-            Models.PathFinder finder = new(this);
-            return finder.FindShortestPath(id_1, id_2);
-        }
+    public abstract class GraphException : System.Exception { }
+    public class NodeDoesNotExistException : GraphException
+    {
+        public override string Message => "Node wasn't found in grpah";
+        public NodeDoesNotExistException() { }
+    }
+    public class NotConnectedException : GraphException
+    {
+        public override string Message => "Nodes are not connected";
+        public NotConnectedException() { }
     }
 }

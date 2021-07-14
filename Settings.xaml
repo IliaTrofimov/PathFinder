@@ -1,0 +1,43 @@
+﻿<Window x:Class="PathFinder.Settings"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PathFinder"
+        mc:Ignorable="d"
+        Title="Settings" Height="300" Width="250" WindowStyle="SingleBorderWindow" ResizeMode="NoResize">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Label Content="Size multiplier:" HorizontalAlignment="Left"/>
+        <ComboBox Name="combo_size" Grid.Column="1" Margin="0,5,20,5">
+            <ComboBoxItem Content="Big"/>
+            <ComboBoxItem Content="Normal"/>
+            <ComboBoxItem Content="Small"/>
+            <ComboBoxItem Content="Tiny"/>
+            <ComboBoxItem Content="Hidden"/>
+        </ComboBox>
+
+        <Label Content="Templates density:" Grid.Row="1" HorizontalAlignment="Left"/>
+        <ComboBox Name="combo_density" Grid.Column="1" Grid.Row="1" Margin="0,5,20,5">
+            <ComboBoxItem Content="5"/>
+            <ComboBoxItem Content="10"/>
+            <ComboBoxItem Content="15"/>
+            <ComboBoxItem Content="20"/>
+            <ComboBoxItem Content="25"/>
+        </ComboBox>
+
+        <Button Content="OK" Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="50" Height="20" Margin="0,0,0,20" IsDefault="True" Click="Ok_Click"/>
+        <Button Content="Cancel" Grid.Column="1"  Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="50" Height="20" Margin="0,0,0,20" IsCancel="True" Click="Cancel_Click"/>
+    </Grid>
+</Window>

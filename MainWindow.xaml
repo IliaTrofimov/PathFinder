@@ -30,13 +30,14 @@
                 <MenuItem Header="Reset">
                     <MenuItem Header="Empty graph" Click="Reset_Click" x:Uid="_"/>
                     <Separator/>
+                    <MenuItem Header="Dots grid" Click="Reset_Click" x:Uid="Dot"/>
                     <MenuItem Header="Rectangle grid" Click="Reset_Click" x:Uid="Rec"/>
                     <MenuItem Header="Triangle grid" Click="Reset_Click" x:Uid="Tri"/>
                     <MenuItem Header="Romb grid" Click="Reset_Click" x:Uid="Rom"/>
-                    <CheckBox Content="High density" x:Name="checkbox_density"/>
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="Find path" Click="Run_Click"/>
+            <MenuItem Header="Settings" Click="Settings_Click"/>
             <MenuItem Header="About" Click="About_Click"/>
         </Menu>
 

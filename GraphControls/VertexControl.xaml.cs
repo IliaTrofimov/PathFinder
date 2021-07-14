@@ -34,15 +34,43 @@ namespace PathFinder.GraphControls
         }
         private int tag;
 
+        public double SizeMultiplier
+        {
+            get => size_mult;
+            set
+            {
+                if (value < 0)
+                    throw new System.ArgumentException("Size multiplier cannot be negative");
+                size_mult = value;
+                grid.Height = 25 * size_mult;
+                grid.Width = 25 * size_mult;
+                label.Visibility = size_mult < 0.8 ? Visibility.Collapsed : Visibility.Visible;
+            }
+        }
+        private double size_mult;
 
-        public VertexControl(int tag = 1, NodeSelection selection = NodeSelection.None)
+
+        public VertexControl(int tag = 1, double mult = 1.0)
         {
             InitializeComponent();
             Tag = tag;
-            Selection = selection;
+            Selection = NodeSelection.None;
+            SizeMultiplier = mult;
             menu_clear.Visibility = selection != NodeSelection.None ? Visibility.Visible : Visibility.Collapsed;
         }
+        public VertexControl(Panel root, Point point, int tag = 1, double mult = 1.0) 
+        {
+            InitializeComponent();
+            Tag = tag;
+            Selection = NodeSelection.None;
+            SizeMultiplier = mult;
+            menu_clear.Visibility = selection != NodeSelection.None ? Visibility.Visible : Visibility.Collapsed;
 
+            root.Children.Add(this);
+            Canvas.SetLeft(this, point.X);
+            Canvas.SetTop(this, point.Y);
+            Panel.SetZIndex(this, 2);
+        }
 
         public delegate void SelectionChanged(VertexControl sender, SelectionChangedArgs e);
         public event SelectionChanged OnSelectionChanged;
@@ -141,7 +169,7 @@ namespace PathFinder.GraphControls
         {
             NodeSelection.A => Brushes.Crimson,
             NodeSelection.B => Brushes.CornflowerBlue,
-            _ or NodeSelection.None => Brushes.LightYellow
+            _ or NodeSelection.None => Brushes.SlateGray
         };
     }
 }

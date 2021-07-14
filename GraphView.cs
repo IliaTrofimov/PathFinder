@@ -27,7 +27,7 @@ namespace PathFinder
             avaliable_id = points.Count + 1;
         }
 
-
+       
         public int AddNode(Vector p)
         {
             if (Points.ContainsKey(avaliable_id) && graph.Contains(avaliable_id))
@@ -54,6 +54,15 @@ namespace PathFinder
             graph.Nodes.Clear();
             avaliable_id = 0;
         }
+        public void ResizePoints(double offset_mult)
+        {
+            if (offset_mult <= 0)
+                throw new System.ArgumentException("Offset multiplier must be greater then 0");
+            Dictionary<int, Vector> temp = new(points.Count);
+            foreach (var p in points)
+                temp.Add(p.Key, new(p.Value.X * offset_mult, p.Value.Y * offset_mult));
+            points = temp;
+        }
 
 
         public bool Connect(int id_1, int id_2)
@@ -75,7 +84,14 @@ namespace PathFinder
 
         public List<int> GetPath(int id_1, int id_2)
         {
-            return graph.FindPath(id_1, id_2);
+            try
+            {
+                return new Models.PathFinder(graph).FindShortestPath(id_1, id_2);
+            }
+            catch (GraphException)
+            {
+                return new();
+            }
         }
         public Dictionary<int, Vector> GetLinkedPoints(int id)
         {

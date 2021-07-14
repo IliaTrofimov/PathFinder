@@ -53,19 +53,25 @@ namespace PathFinder
         {
             Models.GraphBuilder.GridTypes type = ((MenuItem)sender).Uid switch
             {
+                "Dot" => Models.GraphBuilder.GridTypes.Disconnected,
                 "Rec" => Models.GraphBuilder.GridTypes.Rectangle,
                 "Tri" => Models.GraphBuilder.GridTypes.Triangle,
                 "Rom" => Models.GraphBuilder.GridTypes.Romb,
                 _ or "_" => Models.GraphBuilder.GridTypes.Empty
             };
-            graph.Reset(type);
+            graph.Reset(Properties.Settings.Default.templates_density, type);
         }
         private void Run_Click(object sender, RoutedEventArgs e)
         {
-            if(!graph.GetPath())
-                System.Media.SystemSounds.Asterisk.Play();
-            else
-                System.Media.SystemSounds.Hand.Play();
+            try
+            {
+                if (!graph.GetPath())
+                    System.Media.SystemSounds.Asterisk.Play();
+            }
+            catch(System.Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error");
+            }       
         }
         private void About_Click(object sender, RoutedEventArgs e)
         {
@@ -106,6 +112,15 @@ namespace PathFinder
                     System.Media.SystemSounds.Asterisk.Play();
                     MessageBox.Show(ex.Message, "Error"); 
                 }
+            }
+        }
+
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            Settings settingsWindow = new();
+            if (settingsWindow.ShowDialog() == true)
+            {
+                graph.SizeMultiplier = Properties.Settings.Default.size_multiplier;
             }
         }
     }

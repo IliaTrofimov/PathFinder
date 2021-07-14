@@ -1,4 +1,5 @@
 ﻿using PathFinder.Models;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,6 +18,8 @@ namespace PathFinder.GraphControls
         private List<int> path;
 
         private Dictionary<Pair, Line> lines;
+        private Point mousePosStart;
+        private SelectionArea selection;
 
         private int selec_a, selec_b;
         public int Selection_A
@@ -26,6 +29,7 @@ namespace PathFinder.GraphControls
             {
                 selec_a = value;
                 txt_select.Text = SelectionStr;
+                DrawPath(path, Brushes.Gray);
             }
         }
         public int Selection_B
@@ -35,21 +39,37 @@ namespace PathFinder.GraphControls
             {
                 selec_b = value;
                 txt_select.Text = SelectionStr;
+                DrawPath(path, Brushes.Gray);
             }
         }
         public int NodesCount
         {
             get => view.NodesCount;
         }
+        public double SizeMultiplier
+        {
+            get => size_mult;
+            set
+            {
+                if (value < 0)
+                    throw new System.ArgumentException("Size multiplier cannot be negative");
+                size_mult = value;
+                Draw();
+            }
+        }
+        private double size_mult;
+
 
 
         public GraphControl()
         {
             InitializeComponent();
-            view = new();
+            size_mult = 1;
             selec_a = -1;
             selec_b = -1;
+            view = new();
             lines = new();
+            path = new();
             txt_select.Text = SelectionStr;
         }
 
@@ -85,11 +105,7 @@ namespace PathFinder.GraphControls
         /// <param name="id">Node id</param>
         private void DrawNode(Vector v, int id)
         {
-            VertexControl ver = new(id, ToNodeSelection(id));
-            canvas.Children.Add(ver);
-            Canvas.SetLeft(ver, v.X);
-            Canvas.SetTop(ver, v.Y);
-            Panel.SetZIndex(ver, 2);
+            VertexControl ver = new(canvas, (Point)v, id, size_mult);
 
             ver.OnSelectionChanged += OnSelectionChanged;
             ver.OnRemoved += OnNodeRemoved;
@@ -109,11 +125,12 @@ namespace PathFinder.GraphControls
                 Y1 = v1.Y, Y2 = v2.Y,
                 Stroke = Brushes.Gray,
             };
+            double mult = size_mult == 0 ? 1 : size_mult;
             lines.Add(pair, l);
             canvas.Children.Add(l);
-            Canvas.SetLeft(l, 12.5);
-            Canvas.SetTop(l, 12.5);
-            Canvas.SetZIndex(l, 1);
+            Canvas.SetLeft(l, 12.5 * mult);
+            Canvas.SetTop(l, 12.5 * mult);
+            Panel.SetZIndex(l, 1);
         }
         
         /// <summary>
@@ -123,8 +140,15 @@ namespace PathFinder.GraphControls
         {
             for (int i = 0; i < path.Count - 1; i++)
             {
-                lines[new(path[i], path[i + 1])].Stroke = brush;
-                lines[new(path[i], path[i + 1])].StrokeThickness = thickness;
+                try
+                {
+                    lines[new(path[i], path[i + 1])].Stroke = brush;
+                    lines[new(path[i], path[i + 1])].StrokeThickness = thickness;
+                }
+                catch (KeyNotFoundException)
+                {
+                    continue;
+                }
             }
         }
 
@@ -203,25 +227,47 @@ namespace PathFinder.GraphControls
             Selection_A = -1;
             Selection_B = -1;
         }
+        private void RemoveSelected_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = canvas.Children.Count - 1; i >= 0; i--)
+            {
+                try
+                {
+                    if (canvas.Children[i] is VertexControl vertex &&
+                        selection.Rect.Contains(vertex.TransformToAncestor(canvas).Transform(new(12.5, 12.5))))
+                    {
+                        int id = vertex.Tag;
+                        canvas.Children.Remove(vertex);
+                        foreach (var p_2 in view.GetLinkedPoints(id))
+                        {
+                            Pair pair = new(id, p_2.Key);
+                            canvas.Children.Remove(lines[pair]);
+                            lines.Remove(pair);
+                        }
+                        view.RemoveNode(id);
+                    }
+                }
+                catch (System.Exception)
+                {
+                    continue;
+                }
+            }
 
+            Selection_A = -1;
+            Selection_B = -1;
+            txt_graphTable.Text = view.GraphString();
+            canvas.Children.Remove(selection);
+        }
 
 
         /// <summary>Draws shortest path between selected nodes.</summary>
         /// <returns>True if path was found successfuly, false if path wasn't found or nodes wasn't selected correctly.</returns>
         public bool GetPath()
         {
-            if (selec_a != -1 && selec_b != -1)
-            {   
-                if (path != null) DrawPath(path, Brushes.Gray);
-
-                path = view.GetPath(selec_a, selec_b);
-                if (path != null || path.Count != 0)
-                {
-                    DrawPath(path, Brushes.Brown, 2.5);
-                    return true;
-                }
-            }
-            return false;
+            DrawPath(path, Brushes.Gray);
+            path = view.GetPath(selec_a, selec_b);
+            DrawPath(path, Brushes.Brown, 2.5);
+            return path.Count != 0;
         }
         
         /// <summary>Tries to connect selected nodes.</summary>
@@ -265,9 +311,9 @@ namespace PathFinder.GraphControls
         /// <summary>
         /// Resets graph model and redraws control.
         /// </summary>
-        public void Reset(GraphBuilder.GridTypes type = GraphBuilder.GridTypes.Empty)
+        public void Reset(int density = 10, GraphBuilder.GridTypes type = GraphBuilder.GridTypes.Empty)
         {
-            view = new(new(type, new(15, 15, canvas.ActualWidth * 0.85, canvas.ActualHeight * 0.85), 10));
+            view = new(new(type, new(15, 15, canvas.ActualWidth * 0.85, canvas.ActualHeight * 0.85), density));
             Selection_A = -1;
             Selection_B = -1;
             Draw();
@@ -297,7 +343,7 @@ namespace PathFinder.GraphControls
         {
             view.SaveJSON(filename);
         }
-       
+
         /// <summary>
         /// Loads graph model from JSON-file and redraws control.
         /// </summary>
@@ -305,6 +351,36 @@ namespace PathFinder.GraphControls
         {
             view.LoadJSON(filename);
             Draw();
+        }
+
+
+        private void LeftMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            menu_remove.Visibility = Visibility.Visible;
+        }
+        private void LeftMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                canvas.Children.Remove(selection);
+                selection = new(canvas, new(mousePosStart, e.GetPosition(canvas)));
+            }
+        }
+        private void LeftMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            mousePosStart = e.GetPosition(canvas);
+            menu_remove.Visibility = Visibility.Collapsed;
+        }
+
+
+        private void Resized(object sender, SizeChangedEventArgs e)
+        {
+            if (Math.Abs(e.NewSize.Width - e.PreviousSize.Width) > 0.1 * e.PreviousSize.Width ||
+                Math.Abs(e.NewSize.Height - e.PreviousSize.Height) > 0.1 * e.PreviousSize.Height)
+            {
+                view.ResizePoints(Math.Min(e.NewSize.Height / e.PreviousSize.Height, e.NewSize.Width / e.PreviousSize.Width));
+                Draw();
+            }       
         }
     }
 }
