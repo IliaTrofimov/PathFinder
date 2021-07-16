@@ -92,16 +92,19 @@ namespace PathFinder.Models
                 throw new ArgumentException("Density must be greater then 0");
             graph = new();
             points = new();
-            int key = first_id;
 
-            for (double y = area.Y; y < area.Y + area.Height; y += area.Height / density)
+            double y = area.Y;
+            double dy = area.Height / density, dx = area.Width / density;
+            for (int i = 0, key = first_id; i < density; i++)
             {
-                for (double x = area.X; x <= area.X + area.Width - area.Width / density; x += area.Width / density)
+                double x = area.X;
+                for (int j = 0; j < density; j++)
                 {
                     points.Add(key, new(x, y));
-                    graph.AddNode(key);
-                    key++;
+                    graph.AddNode(key++);
+                    x += dx;
                 }
+                y += dy;
             }
         }
 

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Xml.Serialization;
 
 namespace PathFinder
 {
@@ -13,6 +15,16 @@ namespace PathFinder
         /// Collection of connected nodes and weights
         /// </summary>
         public Dictionary<Node, int> Links { get; private set; }
+        public List<int> LinkedIDs
+        {
+            get
+            {
+                List<int> links = new(Links.Count);
+                foreach (var l in Links)
+                    links.Add(l.Key.Id);
+                return links;
+            }
+        }
 
         public Node(int id = 0)
         {
@@ -34,13 +46,6 @@ namespace PathFinder
         /// <summary>
         /// Returns list of IDs of nodes that connected to this node
         /// </summary>
-        public List<int> GetLinkedIDs()
-        {
-            List<int> links = new(Links.Count);
-            foreach (var l in Links)
-                links.Add(l.Key.Id);
-            return links;
-        }
         public bool IsLinked(Node node) => Links.ContainsKey(node);
     }
 

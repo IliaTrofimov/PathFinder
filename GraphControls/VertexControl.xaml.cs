@@ -87,7 +87,7 @@ namespace PathFinder.GraphControls
         /// </summary>
         private void Base_MouseEnter(object sender, MouseEventArgs e)
         {
-            base_ellipse.Fill = Brushes.Azure;
+            base_ellipse.Fill = Brushes.CadetBlue;
         }
        
         /// <summary>

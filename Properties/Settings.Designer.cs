@@ -46,5 +46,17 @@ namespace PathFinder.Properties {
                 this["templates_density"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int snapping {
+            get {
+                return ((int)(this["snapping"]));
+            }
+            set {
+                this["snapping"] = value;
+            }
+        }
     }
 }

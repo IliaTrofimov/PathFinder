@@ -17,7 +17,7 @@ namespace PathFinder.GraphControls
         private GraphView view;
         private List<int> path;
 
-        private Dictionary<Pair, Line> lines;
+        private readonly Dictionary<Pair, Line> lines;
         private Point mousePosStart;
         private SelectionArea selection;
 
@@ -58,7 +58,7 @@ namespace PathFinder.GraphControls
             }
         }
         private double size_mult;
-
+        public int GridRounding { get; set; }
 
 
         public GraphControl()
@@ -78,7 +78,6 @@ namespace PathFinder.GraphControls
         public event SelectionReseted OnSelectionReseted;
 
 
-
         /// <summary>
         /// Complitely redraws control. Does not affect graph model.
         /// </summary>
@@ -86,7 +85,6 @@ namespace PathFinder.GraphControls
         {
             canvas.Children.Clear();
             lines.Clear();
-            txt_graphTable.Text = view.GraphString();
 
             foreach (var p_1 in view.Points)
             {
@@ -106,7 +104,6 @@ namespace PathFinder.GraphControls
         private void DrawNode(Vector v, int id)
         {
             VertexControl ver = new(canvas, (Point)v, id, size_mult);
-
             ver.OnSelectionChanged += OnSelectionChanged;
             ver.OnRemoved += OnNodeRemoved;
             ver.OnConnected += OnConnected;
@@ -132,7 +129,7 @@ namespace PathFinder.GraphControls
             Canvas.SetTop(l, 12.5 * mult);
             Panel.SetZIndex(l, 1);
         }
-        
+
         /// <summary>
         /// Redraws links associated with found path
         /// </summary>
@@ -170,7 +167,6 @@ namespace PathFinder.GraphControls
             view.RemoveNode(id);
             Selection_A = -1;
             Selection_B = -1;
-            txt_graphTable.Text = view.GraphString();
         }
 
         /// <summary>
@@ -195,7 +191,7 @@ namespace PathFinder.GraphControls
                     break;
             }
         }
-        
+
         /// <summary>
         /// Connects two nodes.
         /// </summary>
@@ -206,7 +202,7 @@ namespace PathFinder.GraphControls
 
             if (selec_b != -1) Connect();
         }
-        
+
         /// <summary>
         /// Redraws scene when canvas had loaded for the first time.
         /// </summary>
@@ -214,19 +210,39 @@ namespace PathFinder.GraphControls
         {
             Draw();
         }
-        
+
         /// <summary>
         /// Adds new node to view and calls DrawNode() to draw it. Resets selections.
         /// </summary>
         private void Add_Click(object sender, RoutedEventArgs e)
         {
-            int id = view.AddNode((Vector)Mouse.GetPosition(this));
+            Vector v = (Vector)Mouse.GetPosition(this);
+            if (GridRounding != 0)
+            {
+                v.X = Math.Round(v.X);
+                v.Y = Math.Round(v.Y);
+
+                if ((v.X % GridRounding) > GridRounding / 2)
+                    v.X = (int)(v.X / GridRounding + 1) * GridRounding;
+                else
+                    v.X = (int)(v.X / GridRounding - 1) * GridRounding;
+               
+                if ((v.Y % GridRounding) > GridRounding / 2)
+                    v.Y = (int)(v.Y / GridRounding + 1) * GridRounding;
+                else
+                    v.Y = (int)(v.Y / GridRounding - 1) * GridRounding;
+            }
+
+            int id = view.AddNode(v);
             if (id != -1)
                 DrawNode(view.Points[id], id);
-            txt_graphTable.Text = view.GraphString();
             Selection_A = -1;
             Selection_B = -1;
         }
+
+        /// <summary>
+        /// Removes all nodes form selected area. 
+        /// </summary>
         private void RemoveSelected_Click(object sender, RoutedEventArgs e)
         {
             for (int i = canvas.Children.Count - 1; i >= 0; i--)
@@ -255,7 +271,6 @@ namespace PathFinder.GraphControls
 
             Selection_A = -1;
             Selection_B = -1;
-            txt_graphTable.Text = view.GraphString();
             canvas.Children.Remove(selection);
         }
 
@@ -307,7 +322,7 @@ namespace PathFinder.GraphControls
             Draw();
             return true;
         }
-        
+
         /// <summary>
         /// Resets graph model and redraws control.
         /// </summary>
@@ -321,35 +336,27 @@ namespace PathFinder.GraphControls
 
 
         private string SelectionStr => $"A = {selec_a}\nB = {selec_b}";
-        private NodeSelection ToNodeSelection(int id)
-        {
-            return selec_a == id ? NodeSelection.A : selec_b == id ? NodeSelection.B : NodeSelection.None;
-        }
 
-        /// <summary>
-        /// Returns table representation of graph model.
-        /// </summary>
-        public string TableStr() => view.GraphString();
-        
         /// <summary>
         /// Return IDs of all nodes.
         /// </summary>
         public List<int> GetNodes() => new(view.Points.Keys);
-        
+
+
         /// <summary>
         /// Saves graph model associated with this control to JSON-file.
         /// </summary>
-        public void SaveJSON(string filename)
+        public void Save(string filename)
         {
-            view.SaveJSON(filename);
+            view.Save(filename);
         }
 
         /// <summary>
         /// Loads graph model from JSON-file and redraws control.
         /// </summary>
-        public void LoadJSON(string filename)
+        public void Load(string filename)
         {
-            view.LoadJSON(filename);
+            view.Load(filename);
             Draw();
         }
 

@@ -30,12 +30,21 @@ namespace PathFinder
                 25 => 4,
                 _ => 1
             };
+            combo_rounding.SelectedIndex = Properties.Settings.Default.snapping switch
+            {
+                0 => 0,
+                > 0 and <= 10 => 1,
+                > 10 and <= 20 => 2,
+                > 20 and <= 50 => 3,
+                > 50 and <= 100 => 4,
+                _ => 0
+            };
         }
-
 
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
+            Properties.Settings.Default.snapping = Convert.ToInt32(((ComboBoxItem)combo_rounding.SelectedItem).Content);
             Properties.Settings.Default.templates_density = Convert.ToInt32(((ComboBoxItem)combo_density.SelectedItem).Content);
             Properties.Settings.Default.size_multiplier = combo_size.SelectedIndex switch
             {
@@ -45,6 +54,7 @@ namespace PathFinder
                 4 => 0,
                 1 or _ => 1,
             };
+
             Properties.Settings.Default.Save();
             DialogResult = true;
             Close();
@@ -55,7 +65,5 @@ namespace PathFinder
             DialogResult = false;
             Close();
         }
-
-
     }
 }

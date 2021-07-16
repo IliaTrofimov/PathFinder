@@ -22,10 +22,7 @@
         </Canvas>
 
         <Expander Grid.Row="1" HorizontalAlignment="Left" ExpandDirection="Up" Header="Debug table" BorderBrush="{x:Null}" Padding="3,0,3,0">
-            <StackPanel Orientation="Horizontal">
-                <TextBox x:Name="txt_graphTable" Width="300" HorizontalAlignment="Left" Background="#FFF0F0F0" SelectionBrush="{x:Null}" BorderThickness="1,1,0,1" IsReadOnly="True"/>
-                <TextBox x:Name="txt_select" Text="1, 2" Background="#FFF0F0F0" SelectionBrush="{x:Null}" BorderThickness="0,1,1,1" IsReadOnly="True"/>
-            </StackPanel>
+            <TextBox x:Name="txt_select" Text="1, 2" Background="#FFF0F0F0" SelectionBrush="{x:Null}" BorderThickness="0,1,1,1" IsReadOnly="True"/>
         </Expander>
 
     </Grid>

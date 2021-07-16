@@ -37,6 +37,15 @@
             <ComboBoxItem Content="25"/>
         </ComboBox>
 
+        <Label Content="Pixel rounding (WIP):" Grid.Row="2" HorizontalAlignment="Left"/>
+        <ComboBox Name="combo_rounding" Grid.Column="1" Grid.Row="2" Margin="0,5,20,5">
+            <ComboBoxItem Content="0"/>
+            <ComboBoxItem Content="10"/>
+            <ComboBoxItem Content="20"/>
+            <ComboBoxItem Content="50"/>
+            <ComboBoxItem Content="100"/>
+        </ComboBox>
+
         <Button Content="OK" Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="50" Height="20" Margin="0,0,0,20" IsDefault="True" Click="Ok_Click"/>
         <Button Content="Cancel" Grid.Column="1"  Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="50" Height="20" Margin="0,0,0,20" IsCancel="True" Click="Cancel_Click"/>
     </Grid>

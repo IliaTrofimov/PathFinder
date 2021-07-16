@@ -12,6 +12,7 @@ namespace PathFinder
         public MainWindow()
         {
             InitializeComponent();
+            graph.SizeMultiplier = Properties.Settings.Default.size_multiplier;
         }
 
 
@@ -89,7 +90,7 @@ namespace PathFinder
             {
                 try
                 {
-                    graph.SaveJSON(dialog.FileName);
+                    graph.Save(dialog.FileName);
                 }
                 catch (System.Exception ex)
                 {
@@ -105,7 +106,7 @@ namespace PathFinder
             {
                 try 
                 { 
-                    graph.LoadJSON(dialog.FileName); 
+                    graph.Load(dialog.FileName); 
                 }
                 catch(System.Exception ex) 
                 {
@@ -121,6 +122,7 @@ namespace PathFinder
             if (settingsWindow.ShowDialog() == true)
             {
                 graph.SizeMultiplier = Properties.Settings.Default.size_multiplier;
+                graph.GridRounding = Properties.Settings.Default.snapping;
             }
         }
     }

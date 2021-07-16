@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Xml.Serialization;
 
 namespace PathFinder
 {
@@ -13,6 +14,16 @@ namespace PathFinder
         public int NodesCount => Points.Count;
         private int avaliable_id;
         
+        public List<string> Table
+        {
+            get
+            {
+                List<string> list = new(graph.NodesCount);
+                foreach(var n in graph.Nodes)
+                    list.Add($"V{n.Key} - ({points[n.Key]}):\t{string.Join(' ', n.Value.LinkedIDs)}");
+                return list;
+            }
+        }
 
         public GraphView()
         {
@@ -20,14 +31,13 @@ namespace PathFinder
             Points = new();
             avaliable_id = 0;
         }
-
         public GraphView(GraphBuilder builder)
         {
             builder.Build(out graph, out points);
             avaliable_id = points.Count + 1;
         }
 
-       
+
         public int AddNode(Vector p)
         {
             if (Points.ContainsKey(avaliable_id) && graph.Contains(avaliable_id))
@@ -36,6 +46,7 @@ namespace PathFinder
             Points.Add(avaliable_id, p);
             graph.AddNode(avaliable_id);
             avaliable_id = Points.Keys.Last() + 1;
+
             return avaliable_id - 1;
         }
         public bool RemoveNode(int id)
@@ -96,35 +107,28 @@ namespace PathFinder
         public Dictionary<int, Vector> GetLinkedPoints(int id)
         {
             Dictionary<int, Vector> points = new();
-            foreach (var p in graph[id].GetLinkedIDs())
+            foreach (var p in graph[id].LinkedIDs)
                 points.Add(p, Points[p]);
             return points;
         }
-        public string GraphString()
-        {
-            string str = "";
-            foreach (var n in graph.Nodes)
-            {
-                str += $"V{n.Key} - ({Points[n.Key].X:f0}, {Points[n.Key].Y:f0}):\t";
-                foreach (var l in n.Value.Links)
-                    str += $" {l.Key.Id}";
-                str += "\n";
-            }
-            return str;
-        }
 
-
-        public string JSON()
+        
+        public void Save(string filename)
         {
-            return GraphWritter.ToJSONString(graph, Points);
+            GraphWritter w = new() { Graph = graph, Points = points };
+            XmlSerializer s = new(typeof(GraphWritter));
+            System.IO.StreamWriter sw = new(filename);
+            s.Serialize(sw, w);
+            sw.Close();
         }
-        public void SaveJSON(string filename)
+        public void Load(string filename)
         {
-            GraphWritter.ToJSON(filename, graph, Points);
-        }
-        public void LoadJSON(string filename)
-        {
-            GraphWritter.FormJSON(filename, graph, Points);
+            XmlSerializer s = new(typeof(GraphWritter));
+            System.IO.StreamReader sr = new(filename);
+            GraphWritter w = (GraphWritter)s.Deserialize(sr);
+            graph = w.Graph;
+            points = w.Points; 
+            sr.Close();
         }
     }
 }
